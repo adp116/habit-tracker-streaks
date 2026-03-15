@@ -1,121 +1,105 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useState } from "react";
+import axios from "axios";
+import HabitForm from "./components/HabitForm";
+import HabitList from "./components/HabitList";
+import "./index.css";
+import goggins from "./assets/davidgoggins.jpg";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [habits, setHabits] = useState([]);
+  const [quoteIndex, setQuoteIndex] = useState(0);
+
+  const quotes = [
+    "💪 Stay hard.",
+    "🚤 Who's gonna carry the boats?",
+    "🔥 Don't stop when you're tired. Stop when you're done.",
+    "🧠 Be more than motivated. Be driven.",
+    "⚡ Greatness pulls mediocrity into the mud. Get better.",
+    "🏃 Suffering is the true test of life.",
+    "🥶 The only way to grow is to face discomfort.",
+    "👊 You are in danger of living a life so comfortable and soft that you will die without ever realizing your true potential.",
+  ];
+
+  const fetchHabits = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/habits");
+      setHabits(response.data);
+    } catch (error) {
+      console.error("Error fetching habits:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchHabits();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setQuoteIndex((prev) => (prev + 1) % quotes.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [quotes.length]);
+
+  const addHabit = async (habitData) => {
+    try {
+      await axios.post("http://localhost:5000/habits", habitData);
+      fetchHabits();
+    } catch (error) {
+      console.error("Error adding habit:", error);
+    }
+  };
+
+  const checkInHabit = async (id, date = "") => {
+    try {
+      await axios.post(`http://localhost:5000/habits/${id}/checkin`, { date });
+      fetchHabits();
+    } catch (error) {
+      console.error("Error checking in habit:", error);
+    }
+  };
+
+  const deleteHabit = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/habits/${id}`);
+      fetchHabits();
+    } catch (error) {
+      console.error("Error deleting habit:", error);
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+    <div className="page">
+      <div className="background-overlay"></div>
+
+      <div className="app-layout">
+        <aside className="goggins-panel">
+          <img src={goggins} alt="David Goggins" className="goggins-image" />
+          <h2>🏆 Discipline Mode</h2>
+          <p className="rotating-quote">{quotes[quoteIndex]}</p>
+          <div className="side-tags">
+            <span>🔥 No excuses</span>
+            <span>💯 Stay locked in</span>
+            <span>⚔️ Earn your streak</span>
+          </div>
+        </aside>
+
+        <main className="app">
+          <h1>🔥 Habit Tracker + Streaks</h1>
+          <p className="subtitle">
+            Build discipline one day at a time. 🧠⚡
           </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+          <HabitForm onAddHabit={addHabit} />
+          <HabitList
+            habits={habits}
+            onCheckIn={checkInHabit}
+            onDelete={deleteHabit}
+          />
+        </main>
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;
